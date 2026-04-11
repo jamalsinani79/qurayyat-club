@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AnimatedLogoScreen extends StatefulWidget {
   const AnimatedLogoScreen({super.key});
@@ -14,6 +15,7 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
   @override
   void initState() {
     super.initState();
+    requestNotificationPermission();
     startAnimationAndNavigate();
   }
 
@@ -45,4 +47,25 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
       ),
     );
   }
+
+    Future<void> requestNotificationPermission() async {
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+      NotificationSettings settings = await messaging.requestPermission();
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        String? token = await messaging.getToken();
+        print("FCM TOKEN: $token");
+      } else {
+        print("❌ User رفض الإشعارات");
+      }
+
+    } catch (e) {
+      print("Notification error: $e");
+    }
+  }
+
 }

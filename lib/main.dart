@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'routes/app_pages.dart';
+import 'dart:io';
 
 // 🔔 الخلفية
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -34,7 +35,6 @@ void main() async {
   await Firebase.initializeApp();
 
   // 🔐 إذن الإشعارات
-  await FirebaseMessaging.instance.requestPermission();
 
   // 🛠️ تهيئة قناة الإشعارات
   setupNotificationChannel();
