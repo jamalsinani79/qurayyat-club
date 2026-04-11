@@ -34,7 +34,11 @@ void setupNotificationChannel() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print("Firebase init error: $e");
+  }
 
   runApp(const QuriyatClubApp());
 }
