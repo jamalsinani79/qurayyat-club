@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'routes/app_pages.dart';
+import 'dart:io';
 
 // 🔔 الخلفية
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -32,7 +33,11 @@ void setupNotificationChannel() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  // 🔥 تشغيل Firebase فقط للأندرويد
+  if (Platform.isAndroid) {
+    await Firebase.initializeApp();
+  }
 
   runApp(const QuriyatClubApp());
 }
@@ -53,66 +58,63 @@ class _QuriyatClubAppState extends State<QuriyatClubApp> {
   }
 
   Future<void> initNotifications() async {
-    try {
-      await Future.delayed(const Duration(seconds: 2));
+  try {
+    // 🔥 فقط Android
+    if (!Platform.isAndroid) return;
 
-      // 🔐 طلب الإذن
-      await FirebaseMessaging.instance.requestPermission();
+    await Future.delayed(const Duration(seconds: 2));
 
-      // 🔔 تهيئة القناة (Android فقط)
-      setupNotificationChannel();
+    await FirebaseMessaging.instance.requestPermission();
 
-      // 🔔 local notifications
-      const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+    setupNotificationChannel();
 
-      const InitializationSettings initializationSettings =
-          InitializationSettings(
-        android: initializationSettingsAndroid,
-      );
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-      await flutterLocalNotificationsPlugin.initialize(
-          initializationSettings);
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
 
-      // 🔔 background
-      FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-      // 🔔 foreground
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        final title = message.notification?.title ??
-            message.data['title'] ??
-            '📩 إشعار جديد';
+    FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler);
 
-        final body = message.notification?.body ??
-            message.data['body'] ??
-            'لا يوجد محتوى';
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final title = message.notification?.title ??
+          message.data['title'] ??
+          '📩 إشعار جديد';
 
-        flutterLocalNotificationsPlugin.show(
-          DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          title,
-          body,
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'high_importance_channel',
-              'الإشعارات الهامة',
-              channelDescription:
-                  'قناة مخصصة للإشعارات ذات الأهمية العالية',
-              importance: Importance.max,
-              priority: Priority.high,
-              icon: '@mipmap/ic_launcher',
-            ),
+      final body = message.notification?.body ??
+          message.data['body'] ??
+          'لا يوجد محتوى';
+
+      flutterLocalNotificationsPlugin.show(
+        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'high_importance_channel',
+            'الإشعارات الهامة',
+            channelDescription:
+                'قناة مخصصة للإشعارات ذات الأهمية العالية',
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
           ),
-        );
-      });
+        ),
+      );
+    });
 
-      String? token = await FirebaseMessaging.instance.getToken();
-      print("FCM TOKEN: $token");
+    String? token = await FirebaseMessaging.instance.getToken();
+    print("FCM TOKEN: $token");
 
-    } catch (e) {
-      print("Notification error: $e");
-    }
+  } catch (e) {
+    print("Notification error: $e");
   }
+}
 
   @override
   Widget build(BuildContext context) {
