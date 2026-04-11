@@ -10,6 +10,7 @@ import '../widgets/app_drawer.dart';
 import 'package:quriyat_club/screens/register_player_screen.dart';
 import 'package:quriyat_club/screens/transfer_requests_screen.dart';
 import 'package:quriyat_club/screens/borrow_requests_screen.dart';
+import 'dart:io';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -132,31 +133,9 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _getFcmToken() async {
-    try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        print('📱 FCM Token الحقيقي: $token');
-        final prefs = await SharedPreferences.getInstance();
-        final authToken = prefs.getString('auth_token');
-        final response = await http.post(
-          Uri.parse('${AuthService.baseUrl}/save-fcm-token'),
-          headers: {
-            'Authorization': 'Bearer $authToken',
-            'Accept': 'application/json',
-          },
-          body: {'fcm_token': token},
-        );
-
-        if (response.statusCode == 200) {
-          print('✅ تم حفظ FCM token بنجاح في السيرفر');
-        } else {
-          print('⚠️ فشل في حفظ FCM token: ${response.body}');
-        }
-      }
-    } catch (e) {
-      print('💥 خطأ أثناء إرسال FCM token: $e');
-    }
-  }
+  // 🔥 معطل مؤقتًا بسبب مشاكل Firebase على iOS
+  return;
+}
 
   Future<void> fetchTeamData() async {
     try {

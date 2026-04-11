@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import '../../services/auth_service.dart';
 import '../../services/team_service.dart';
 import 'forgot_password_screen.dart';

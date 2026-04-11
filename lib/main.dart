@@ -7,9 +7,6 @@ import 'routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ❌ Firebase موقوف مؤقتًا بالكامل
-
   runApp(const QuriyatClubApp());
 }
 
@@ -21,19 +18,23 @@ class QuriyatClubApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'نادي قريات',
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         fontFamily: 'Tajawal',
         primarySwatch: Colors.orange,
       ),
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+
       supportedLocales: const [
         Locale('en'),
         Locale('ar'),
       ],
+
       locale: const Locale('ar'),
 
       builder: (context, child) {
@@ -44,6 +45,7 @@ class QuriyatClubApp extends StatelessWidget {
       },
 
       home: const AnimatedLogoScreen(),
+
       getPages: AppPages.routes,
     );
   }
