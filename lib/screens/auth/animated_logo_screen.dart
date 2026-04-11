@@ -20,16 +20,22 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
   }
 
   Future<void> startAnimationAndNavigate() async {
-    // ننتظر مدة عرض الجيف
-    await Future.delayed(const Duration(seconds: 3));
+    try {
+      await Future.delayed(const Duration(seconds: 3));
 
-    // التحقق من وجود التوكن
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
 
-    if (token != null && token.isNotEmpty) {
-      Get.offAllNamed('/home');
-    } else {
+      if (token != null && token.isNotEmpty) {
+        Get.offAllNamed('/home');
+      } else {
+        Get.offAllNamed('/login');
+      }
+
+    } catch (e) {
+      print("Navigation Error: $e");
+
+      // fallback مهم جدًا
       Get.offAllNamed('/login');
     }
   }
