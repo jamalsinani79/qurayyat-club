@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'dart:io';
 
-import 'screens/auth/animated_logo_screen.dart'; // 🔥 مهم
+import 'screens/auth/animated_logo_screen.dart';
 import 'routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 Firebase للأندرويد فقط
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp();
-  }
-
+  // 🔥 بدون Firebase مؤقتًا (للتأكد أن iOS يشتغل)
   runApp(const QuriyatClubApp());
 }
 
@@ -30,21 +25,32 @@ class QuriyatClubApp extends StatelessWidget {
         fontFamily: 'Tajawal',
         primarySwatch: Colors.orange,
       ),
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+
       supportedLocales: const [
         Locale('en'),
         Locale('ar'),
       ],
+
       locale: const Locale('ar'),
 
-      // 🔥 بديل عن initialRoute
+      // ✅ اتجاه عربي (عدل حسب رغبتك)
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.ltr, // استخدم TextDirection.rtl إذا كنت تريد اتجاه عربي
+          child: child!,
+        );
+      },
+
+      // ✅ البداية
       home: const AnimatedLogoScreen(),
 
-      // 👇 خليه موجود (ما يضر)
+      // routes (ما تضر)
       getPages: AppPages.routes,
     );
   }
