@@ -57,5 +57,9 @@
 
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>نحتاج الوصول للصور</string>
+
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+
 </dict>
 </plist>
