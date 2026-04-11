@@ -44,7 +44,11 @@ class QuriyatClubApp extends StatelessWidget {
         );
       },
 
-      home: const AnimatedLogoScreen(),
+      home: Scaffold(
+    body: Center(
+      child: Text("TEST OK"),
+    ),
+  ),
 
       getPages: AppPages.routes,
     );
