@@ -4,12 +4,13 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:io';
 
+import 'screens/auth/animated_logo_screen.dart'; // 🔥 مهم
 import 'routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 تشغيل Firebase فقط للأندرويد
+  // 🔥 Firebase للأندرويد فقط
   if (Platform.isAndroid) {
     await Firebase.initializeApp();
   }
@@ -40,8 +41,10 @@ class QuriyatClubApp extends StatelessWidget {
       ],
       locale: const Locale('ar'),
 
-      // 🔥 رجع التطبيق لوضعه الطبيعي
-      initialRoute: AppPages.initial,
+      // 🔥 بديل عن initialRoute
+      home: const AnimatedLogoScreen(),
+
+      // 👇 خليه موجود (ما يضر)
       getPages: AppPages.routes,
     );
   }
