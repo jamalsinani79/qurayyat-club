@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'routes/app_pages.dart';
-import 'dart:io';
 
 // 🔔 الخلفية
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,14 +18,15 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void setupNotificationChannel() {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'high_importance_channel', // يجب أن تطابق القيمة في manifest
+    'high_importance_channel',
     'الإشعارات الهامة',
     description: 'قناة مخصصة للإشعارات ذات الأهمية العالية',
     importance: Importance.high,
   );
 
   flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 }
 
@@ -34,58 +34,85 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // 🔐 إذن الإشعارات
-
-  // 🛠️ تهيئة قناة الإشعارات
-  setupNotificationChannel();
-
-  // 🛠️ تهيئة local_notifications
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  // 🔔 استقبال في الخلفية
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // 🔔 استقبال في الواجهة
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-   final title = message.notification?.title ?? message.data['title'] ?? '📩 إشعار جديد';
-   final body = message.notification?.body ?? message.data['body'] ?? 'لا يوجد محتوى';
-
-
-    print('📥 إشعار Foreground من Firebase');
-    print('🔹 title: $title');
-    print('🔹 body: $body');
-    print('🔹 data: ${message.data}');
-    print('📦 الرسالة الكاملة من Firebase: ${message.toMap()}');
-
-
-    flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'high_importance_channel',
-          'الإشعارات الهامة',
-          channelDescription: 'قناة مخصصة للإشعارات ذات الأهمية العالية',
-          importance: Importance.max,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-        ),
-      ),
-    );
-  });
-
   runApp(const QuriyatClubApp());
 }
 
-
-class QuriyatClubApp extends StatelessWidget {
+class QuriyatClubApp extends StatefulWidget {
   const QuriyatClubApp({super.key});
+
+  @override
+  State<QuriyatClubApp> createState() => _QuriyatClubAppState();
+}
+
+class _QuriyatClubAppState extends State<QuriyatClubApp> {
+
+  @override
+  void initState() {
+    super.initState();
+    initNotifications();
+  }
+
+  Future<void> initNotifications() async {
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+
+      // 🔐 طلب الإذن
+      await FirebaseMessaging.instance.requestPermission();
+
+      // 🔔 تهيئة القناة (Android فقط)
+      setupNotificationChannel();
+
+      // 🔔 local notifications
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+
+      const InitializationSettings initializationSettings =
+          InitializationSettings(
+        android: initializationSettingsAndroid,
+      );
+
+      await flutterLocalNotificationsPlugin.initialize(
+          initializationSettings);
+
+      // 🔔 background
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+
+      // 🔔 foreground
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        final title = message.notification?.title ??
+            message.data['title'] ??
+            '📩 إشعار جديد';
+
+        final body = message.notification?.body ??
+            message.data['body'] ??
+            'لا يوجد محتوى';
+
+        flutterLocalNotificationsPlugin.show(
+          DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title,
+          body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'high_importance_channel',
+              'الإشعارات الهامة',
+              channelDescription:
+                  'قناة مخصصة للإشعارات ذات الأهمية العالية',
+              importance: Importance.max,
+              priority: Priority.high,
+              icon: '@mipmap/ic_launcher',
+            ),
+          ),
+        );
+      });
+
+      String? token = await FirebaseMessaging.instance.getToken();
+      print("FCM TOKEN: $token");
+
+    } catch (e) {
+      print("Notification error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,17 +122,6 @@ class QuriyatClubApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Tajawal',
         primarySwatch: Colors.orange,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.black,
-          elevation: 2,
-          centerTitle: true,
-          titleTextStyle: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
       ),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -117,12 +133,6 @@ class QuriyatClubApp extends StatelessWidget {
         Locale('ar'),
       ],
       locale: const Locale('ar'),
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: child!,
-        );
-      },
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
     );
