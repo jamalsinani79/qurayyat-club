@@ -15,7 +15,7 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
   @override
   void initState() {
     super.initState();
-    requestNotificationPermission();
+    
     startAnimationAndNavigate();
   }
 
