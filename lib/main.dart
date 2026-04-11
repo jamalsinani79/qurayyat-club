@@ -133,8 +133,12 @@ class _QuriyatClubAppState extends State<QuriyatClubApp> {
         Locale('ar'),
       ],
       locale: const Locale('ar'),
-      initialRoute: AppPages.initial,
-      getPages: AppPages.routes,
+
+      home: Scaffold(
+        body: Center(
+          child: Text("Main Loaded ✅"),
+        ),
+      ),
     );
   }
 }
