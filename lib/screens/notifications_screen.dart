@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import '../services/notification_service.dart';
@@ -22,31 +22,6 @@ void initState() {
   super.initState();
   _loadReadNotifications();
   _notificationsFuture = NotificationService.fetchNotifications();
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    if (!mounted) return;
-
-    // دعم كل أنواع الرسائل
-    final title = message.notification?.title ?? message.data['title'] ?? 'إشعار جديد';
-    final body = message.notification?.body ?? message.data['body'] ?? 'وصل إشعار بدون محتوى';
-
-    print('📥 إشعار Foreground داخل NotificationsScreen');
-    print('🔸 title: $title');
-    print('🔸 body: $body');
-    print('🔸 data: ${message.data}');
-    print('🔹 from notification object? ${message.notification != null}');
-    print('🔹 from data object? ${message.data.isNotEmpty}');
-
-    // عرض الإشعار بشكل مرئي
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$title\n$body'),
-        duration: const Duration(seconds: 4),
-        backgroundColor: Colors.orange.shade700,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  });
 }
 
 

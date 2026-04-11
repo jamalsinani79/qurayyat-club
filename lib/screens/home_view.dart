@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quriyat_club/services/auth_service.dart';
 import 'package:quriyat_club/screens/notifications_screen.dart';
@@ -46,7 +46,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    _getFcmToken();
+    //_getFcmToken();
     fetchTeamData();
     fetchUnreadNotificationCount();
     fetchPlayerStatusCounts();
