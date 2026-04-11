@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551494455212",
+    "project_id": "qurayyatclub",
+    "storage_bucket": "qurayyatclub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551494455212:android:55df109a3d5386d6b6b409",
+        "android_client_info": {
+          "package_name": "com.example.quriyat_club"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmMYW57jQJmLHPAg6wZ31p1RDYzsh443w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
