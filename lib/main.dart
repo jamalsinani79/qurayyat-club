@@ -34,13 +34,11 @@ void setupNotificationChannel() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 تشغيل Firebase فقط للأندرويد
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp();
-  }
+  await Firebase.initializeApp();
 
   runApp(const QuriyatClubApp());
 }
+
 
 class QuriyatClubApp extends StatefulWidget {
   const QuriyatClubApp({super.key});
