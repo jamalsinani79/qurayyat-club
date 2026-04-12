@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 
-import 'screens/auth/animated_logo_screen.dart';
 import 'routes/app_pages.dart';
 
 void main() {
@@ -54,7 +53,6 @@ class QuriyatClubApp extends StatelessWidget {
 
       locale: const Locale('ar'),
 
-      // 👇 الاتجاه عربي (RTL)
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -62,9 +60,10 @@ class QuriyatClubApp extends StatelessWidget {
         );
       },
 
+      // 👇 وضع آمن (بدون أي شاشة معقدة)
       home: Scaffold(
         body: Center(
-          child: Text("TEST OK"),
+          child: Text("SAFE MODE ✅"),
         ),
       ),
 
