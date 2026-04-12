@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../services/auth_service.dart';
 import '../../services/team_service.dart';
 import 'forgot_password_screen.dart';
@@ -20,50 +20,53 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
 
   void handleLogin() async {
-    final username = emailController.text.trim();
-    final password = passwordController.text;
+  final username = emailController.text.trim();
+  final password = passwordController.text;
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال اسم المستخدم وكلمة المرور')),
-      );
-      return;
+  if (username.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('يرجى إدخال اسم المستخدم وكلمة المرور')),
+    );
+    return;
+  }
+
+  setState(() => isLoading = true);
+
+  // 🔥 جلب FCM Token الحقيقي
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print("🔥 FCM TOKEN: $fcmToken");
+
+  final result = await AuthService.login(
+    username: username,
+    password: password,
+    deviceToken: fcmToken ?? '',
+  );
+
+  setState(() => isLoading = false);
+
+  if (result['success']) {
+    final user = result['user'];
+    final token = result['token'];
+
+    final prefs = await SharedPreferences.getInstance();
+
+    if (rememberMe) {
+      await prefs.setString('auth_token', token);
+      await prefs.setString('username', user['username']);
+      await prefs.setInt('team_id', user['id']);
     }
 
-    setState(() => isLoading = true);
-
-    final result = await AuthService.login(
-      username: username,
-      password: password,
-      deviceToken: 'dummy_device_token_123',
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('مرحبًا ${user['username']}')),
     );
 
-    setState(() => isLoading = false);
-
-    if (result['success']) {
-      final user = result['user'];
-      final token = result['token'];
-
-      final prefs = await SharedPreferences.getInstance();
-
-      // ✅ نحفظ البيانات فقط إذا تم تفعيل خيار "تذكرني"
-      if (rememberMe) {
-        await prefs.setString('auth_token', token);
-        await prefs.setString('username', user['username']);
-        await prefs.setInt('team_id', user['id']);
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('مرحبًا ${user['username']}')),
-      );
-
-      Get.offAllNamed('/home');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'فشل تسجيل الدخول')),
-      );
-    }
+    Get.offAllNamed('/home');
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result['message'] ?? 'فشل تسجيل الدخول')),
+    );
   }
+}
 
 
   @override
