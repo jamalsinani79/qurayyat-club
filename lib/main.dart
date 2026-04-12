@@ -5,8 +5,25 @@ import 'package:get/get.dart';
 import 'screens/auth/animated_logo_screen.dart';
 import 'routes/app_pages.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // التقاط أخطاء Flutter
+  FlutterError.onError = (details) {
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text(
+              "ERROR:\n${details.exception}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+
   runApp(const QuriyatClubApp());
 }
 
@@ -37,14 +54,19 @@ class QuriyatClubApp extends StatelessWidget {
 
       locale: const Locale('ar'),
 
+      // 👇 الاتجاه عربي (RTL)
       builder: (context, child) {
         return Directionality(
-          textDirection: TextDirection.ltr, // 👈 مهم للعربي
+          textDirection: TextDirection.rtl,
           child: child!,
         );
       },
 
-      home: const AnimatedLogoScreen(), // 👈 هنا التعديل
+      home: Scaffold(
+        body: Center(
+          child: Text("TEST OK"),
+        ),
+      ),
 
       getPages: AppPages.routes,
     );
