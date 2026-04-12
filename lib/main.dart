@@ -11,6 +11,7 @@ void main() {
   FlutterError.onError = (details) {
     runApp(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
             child: Text(
@@ -53,17 +54,15 @@ class QuriyatClubApp extends StatelessWidget {
 
       locale: const Locale('ar'),
 
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        );
-      },
+      // ❌ بدون builder (كان يسبب الشاشة السوداء)
 
-      // 👇 وضع آمن (بدون أي شاشة معقدة)
       home: Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
-          child: Text("SAFE MODE ✅"),
+          child: Text(
+            "SAFE MODE ✅",
+            style: TextStyle(fontSize: 22),
+          ),
         ),
       ),
 
