@@ -24,10 +24,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -45,29 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
-	<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-</dict>
-
-	<key>NSCameraUsageDescription</key>
-	<string>نحتاج الكاميرا لرفع الصور</string>
-
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>نحتاج الوصول للصور</string>
-
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-
-	<key>UIRequiresFullScreen</key>
-<true/>
-
-<key>LSApplicationQueriesSchemes</key>
-<array>
-    <string>http</string>
-    <string>https</string>
-</array>
 </dict>
 </plist>
