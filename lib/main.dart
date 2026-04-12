@@ -39,16 +39,12 @@ class QuriyatClubApp extends StatelessWidget {
 
       builder: (context, child) {
         return Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: TextDirection.ltr, // 👈 مهم للعربي
           child: child!,
         );
       },
 
-      home: Scaffold(
-    body: Center(
-      child: Text("TEST OK"),
-    ),
-  ),
+      home: const AnimatedLogoScreen(), // 👈 هنا التعديل
 
       getPages: AppPages.routes,
     );
