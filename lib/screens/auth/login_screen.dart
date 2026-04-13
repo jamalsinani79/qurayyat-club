@@ -32,14 +32,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
   setState(() => isLoading = true);
 
-  // 🔥 جلب FCM Token الحقيقي
-  String? fcmToken = await FirebaseMessaging.instance.getToken();
-  print("🔥 FCM TOKEN: $fcmToken");
+  String? fcmToken;
+
+  try {
+    // 🔥 نحاول أكثر من مرة (مهم للـ iOS فقط)
+    for (int i = 0; i < 5; i++) {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+
+      if (fcmToken != null && fcmToken.isNotEmpty) break;
+
+      await Future.delayed(const Duration(seconds: 1));
+    }
+  } catch (e) {
+    print("FCM Error: $e");
+  }
+
+  // 🔥 fallback مهم (عشان السيرفر ما يرفض)
+  fcmToken ??= "no-token";
 
   final result = await AuthService.login(
     username: username,
     password: password,
-    deviceToken: fcmToken ?? '',
+    deviceToken: fcmToken,
   );
 
   setState(() => isLoading = false);
@@ -67,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
