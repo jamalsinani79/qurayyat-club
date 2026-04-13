@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -23,13 +25,35 @@ void main() async {
   if (!kIsWeb) {
     await Firebase.initializeApp();
 
-    // 🔔 الخلفية
+    // 🔔 استقبال إشعارات الخلفية
     FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler);
+      _firebaseMessagingBackgroundHandler,
+    );
 
-    // 🔔 طلب إذن (مهم جدًا للآيفون)
-    NotificationSettings settings =
-        await FirebaseMessaging.instance.requestPermission(
+    // 🔥 إعداد الإشعارات حسب النظام
+    await setupFirebaseMessaging();
+  }
+
+  runApp(const QuriyatClubApp());
+}
+
+// 🔥 إعداد الإشعارات
+Future<void> setupFirebaseMessaging() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // 🤖 ANDROID
+  if (Platform.isAndroid) {
+    print("🤖 إعداد Android");
+
+    String? token = await messaging.getToken();
+    print("🔥 ANDROID TOKEN: $token");
+  }
+
+  // 🍎 IOS
+  else if (Platform.isIOS) {
+    print("🍎 إعداد iOS");
+
+    NotificationSettings settings = await messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
@@ -37,39 +61,35 @@ void main() async {
 
     print('🔔 حالة الإذن: ${settings.authorizationStatus}');
 
-    // 🔥 جلب التوكن
-    String? token = await FirebaseMessaging.instance.getToken();
-    print("🔥 FCM TOKEN: $token");
-
-    // 🔄 تحديث التوكن
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      print("🔄 NEW FCM TOKEN: $newToken");
-    });
-
-    // ✅ استقبال الإشعار والتطبيق مفتوح
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('📩 إشعار أثناء فتح التطبيق');
-      print('📌 Title: ${message.notification?.title}');
-      print('📌 Body: ${message.notification?.body}');
-    });
-
-    // ✅ عند الضغط على الإشعار
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('🚀 تم فتح التطبيق من إشعار');
-    });
-
-    // 🔥 مهم جدًا للآيفون (عرض الإشعار أثناء التشغيل)
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
+    await messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
+
+    String? token = await messaging.getToken();
+    print("🔥 IOS TOKEN: $token");
   }
 
-  runApp(const QuriyatClubApp());
+  // 🔄 تحديث التوكن
+  messaging.onTokenRefresh.listen((newToken) {
+    print("🔄 NEW TOKEN: $newToken");
+  });
+
+  // 📩 أثناء فتح التطبيق
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('📩 إشعار أثناء فتح التطبيق');
+    print('📌 Title: ${message.notification?.title}');
+    print('📌 Body: ${message.notification?.body}');
+  });
+
+  // 🚀 عند الضغط على الإشعار
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('🚀 تم فتح التطبيق من إشعار');
+  });
 }
 
+// 🚀 التطبيق
 class QuriyatClubApp extends StatelessWidget {
   const QuriyatClubApp({super.key});
 
@@ -85,7 +105,10 @@ class QuriyatClubApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
       ),
 
+      // 🌍 اللغة
       locale: const Locale('ar'),
+      fallbackLocale: const Locale('en'),
+
       supportedLocales: const [
         Locale('ar'),
         Locale('en'),
@@ -97,13 +120,8 @@ class QuriyatClubApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      // ✅ الاتجاه الصحيح
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.ltr, // 👈 مهم للعربي
-          child: child!,
-        );
-      },
+      // ❌ لا تستخدم Directionality هنا (مهم جدًا)
+      // Flutter يحدد الاتجاه تلقائيًا حسب اللغة
 
       home: const AnimatedLogoScreen(),
       getPages: AppPages.routes,
