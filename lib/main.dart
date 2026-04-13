@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'firebase_options.dart';
 import 'routes/app_pages.dart';
 import 'screens/auth/animated_logo_screen.dart';
-import 'services/auth_service.dart';
 
 // 📩 استقبال الإشعارات بالخلفية
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -51,7 +50,7 @@ Future<void> setupFirebaseMessaging() async {
       print("🤖 ANDROID TOKEN: $token");
 
       if (token != null) {
-        await sendTokenToServer(token);
+        print("🤖 TOKEN READY: $token");
       }
     }
 
@@ -87,14 +86,13 @@ Future<void> setupFirebaseMessaging() async {
       print("🍎 IOS TOKEN: $token");
 
       if (token != null) {
-        await sendTokenToServer(token);
+        print("🍎 TOKEN READY: $token");
       }
     }
 
     // 🔄 تحديث التوكن
     messaging.onTokenRefresh.listen((newToken) async {
       print("🔄 NEW TOKEN: $newToken");
-      await sendTokenToServer(newToken);
     });
 
     // 📩 أثناء فتح التطبيق
@@ -114,18 +112,28 @@ Future<void> setupFirebaseMessaging() async {
   }
 }
 
-// 🔥 إرسال التوكن للسيرفر
-Future<void> sendTokenToServer(String token) async {
-  try {
-    await AuthService.updateDeviceToken(token);
-  } catch (e) {
-    print("❌ فشل إرسال التوكن: $e");
-  }
+// 🚀 التطبيق
+class QuriyatClubApp extends StatefulWidget {
+  const QuriyatClubApp({super.key});
+
+  @override
+  State<QuriyatClubApp> createState() => _QuriyatClubAppState();
 }
 
-// 🚀 التطبيق
-class QuriyatClubApp extends StatelessWidget {
-  const QuriyatClubApp({super.key});
+class _QuriyatClubAppState extends State<QuriyatClubApp> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔥 تشغيل الإشعارات بعد تشغيل التطبيق
+    Future.delayed(Duration.zero, () async {
+      if (!kIsWeb) {
+        await Firebase.initializeApp();
+        await setupFirebaseMessaging();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +155,13 @@ class QuriyatClubApp extends StatelessWidget {
         Locale('en'),
       ],
 
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: child!,
+        );
+      },
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -158,3 +173,5 @@ class QuriyatClubApp extends StatelessWidget {
     );
   }
 }
+
+  

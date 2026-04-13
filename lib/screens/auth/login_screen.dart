@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await Future.delayed(const Duration(seconds: 1));
     }
+    print("🔥 FCM TOKEN FROM LOGIN: $fcmToken");
   } catch (e) {
     print("FCM Error: $e");
   }
@@ -53,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final result = await AuthService.login(
     username: username,
     password: password,
-    deviceToken: '',
+    deviceToken: fcmToken ?? '',
   );
 
   setState(() => isLoading = false);
