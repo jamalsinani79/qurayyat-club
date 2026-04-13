@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +27,7 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
       final token = prefs.getString('auth_token');
 
       if (token != null && token.isNotEmpty) {
+        await setupFirebaseMessaging();
         Get.offAllNamed('/home');
       } else {
         Get.offAllNamed('/login');

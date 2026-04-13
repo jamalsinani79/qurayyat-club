@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final result = await AuthService.login(
     username: username,
     password: password,
-    deviceToken: fcmToken,
+    deviceToken: '',
   );
 
   setState(() => isLoading = false);

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,62 +10,122 @@ import 'package:flutter/foundation.dart';
 import 'firebase_options.dart';
 import 'routes/app_pages.dart';
 import 'screens/auth/animated_logo_screen.dart';
+import 'services/auth_service.dart';
+
+// 📩 استقبال الإشعارات بالخلفية
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print("📩 رسالة في الخلفية: ${message.messageId}");
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 تهيئة Firebase بالطريقة الصحيحة (مهم جدًا)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FirebaseMessaging.onBackgroundMessage(
+    _firebaseMessagingBackgroundHandler,
   );
 
   runApp(const QuriyatClubApp());
 }
 
-class QuriyatClubApp extends StatefulWidget {
-  const QuriyatClubApp({super.key});
+// 🔥 إعداد الإشعارات (مفصول Android / iOS)
+Future<void> setupFirebaseMessaging() async {
+  try {
+    if (kIsWeb) return;
 
-  @override
-  State<QuriyatClubApp> createState() => _QuriyatClubAppState();
-}
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-class _QuriyatClubAppState extends State<QuriyatClubApp> {
+    // =========================
+    // 🤖 ANDROID
+    // =========================
+    if (Platform.isAndroid) {
+      print("🤖 ANDROID SETUP");
 
-  @override
-  void initState() {
-    super.initState();
+      String? token = await messaging.getToken();
+      print("🤖 ANDROID TOKEN: $token");
 
-    // 🔔 تشغيل الإشعارات بعد تشغيل التطبيق
-    initNotifications();
-  }
+      if (token != null) {
+        await sendTokenToServer(token);
+      }
+    }
 
-  Future<void> initNotifications() async {
-    try {
-      if (kIsWeb) return;
+    // =========================
+    // 🍎 IOS
+    // =========================
+    else if (Platform.isIOS) {
+      print("🍎 IOS SETUP");
 
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-      // 🔔 طلب الإذن
-      NotificationSettings settings = await messaging.requestPermission(
+      await messaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
       );
 
-      print("Authorization: ${settings.authorizationStatus}");
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-      String? fcmToken = await messaging.getToken();
-      print("🔥 FCM TOKEN: $fcmToken");
+      String? token;
 
-      // 📩 استقبال الإشعار أثناء فتح التطبيق
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        print("📩 Notification: ${message.notification?.title}");
-      });
+      // 🔥 retry مهم للـ iOS
+      for (int i = 0; i < 5; i++) {
+        token = await messaging.getToken();
 
-    } catch (e) {
-      print("❌ Notification error: $e");
+        if (token != null && token.isNotEmpty) break;
+
+        await Future.delayed(const Duration(seconds: 1));
+      }
+
+      print("🍎 IOS TOKEN: $token");
+
+      if (token != null) {
+        await sendTokenToServer(token);
+      }
     }
+
+    // 🔄 تحديث التوكن
+    messaging.onTokenRefresh.listen((newToken) async {
+      print("🔄 NEW TOKEN: $newToken");
+      await sendTokenToServer(newToken);
+    });
+
+    // 📩 أثناء فتح التطبيق
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📩 إشعار أثناء فتح التطبيق');
+      print('📌 Title: ${message.notification?.title}');
+      print('📌 Body: ${message.notification?.body}');
+    });
+
+    // 🚀 عند الضغط على الإشعار
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('🚀 تم فتح التطبيق من إشعار');
+    });
+
+  } catch (e) {
+    print("❌ Notification error: $e");
   }
+}
+
+// 🔥 إرسال التوكن للسيرفر
+Future<void> sendTokenToServer(String token) async {
+  try {
+    await AuthService.updateDeviceToken(token);
+  } catch (e) {
+    print("❌ فشل إرسال التوكن: $e");
+  }
+}
+
+// 🚀 التطبيق
+class QuriyatClubApp extends StatelessWidget {
+  const QuriyatClubApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +139,6 @@ class _QuriyatClubAppState extends State<QuriyatClubApp> {
         scaffoldBackgroundColor: Colors.white,
       ),
 
-      // 🌍 اللغة
       locale: const Locale('ar'),
       fallbackLocale: const Locale('en'),
 
