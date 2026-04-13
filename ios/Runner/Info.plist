@@ -45,21 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
-	<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-</dict>
-
-	<key>NSCameraUsageDescription</key>
-	<string>نحتاج الكاميرا لرفع الصور</string>
-
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>نحتاج الوصول للصور</string>
-
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-
 </dict>
 </plist>
