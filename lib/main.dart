@@ -55,12 +55,12 @@ Future<void> setupFirebaseMessaging() async {
     }
 
     // =========================
-    // 🍎 IOS
+    // 🍎 IOS (تم التعديل هنا 🔥)
     // =========================
     else if (Platform.isIOS) {
       print("🍎 IOS SETUP");
 
-      // طلب الإذن
+      // 🔔 طلب الإذن
       NotificationSettings settings = await messaging.requestPermission(
         alert: true,
         badge: true,
@@ -75,51 +75,51 @@ Future<void> setupFirebaseMessaging() async {
         sound: true,
       );
 
-      // 🔥 APNS
-      String? apnsToken = await messaging.getAPNSToken();
-      print("🍎 APNS TOKEN: $apnsToken");
+      String? token;
 
-      if (apnsToken != null) {
-        Get.snackbar(
-          "APNS TOKEN",
-          apnsToken,
-          duration: const Duration(seconds: 10),
-        );
+      // 🔥 retry مهم جدًا في iOS
+      for (int i = 0; i < 10; i++) {
+        token = await messaging.getToken();
+
+        if (token != null && token.isNotEmpty) {
+          break;
+        }
+
+        await Future.delayed(const Duration(seconds: 2));
       }
 
-      if (apnsToken == null) {
-        print("❌ APNS NOT READY");
-        return;
-      }
+      print("🍎 FINAL TOKEN: $token");
 
-      await Future.delayed(const Duration(seconds: 2));
-
-      // 🔥 FCM
-      String? fcmToken = await messaging.getToken();
-      print("🍎 FCM TOKEN: $fcmToken");
-
-      if (fcmToken != null) {
+      if (token != null) {
         Get.snackbar(
           "FCM TOKEN",
-          fcmToken,
+          token,
           duration: const Duration(seconds: 10),
         );
+      } else {
+        print("❌ TOKEN NOT RECEIVED");
       }
     }
 
+    // =========================
     // 🔄 تحديث التوكن
+    // =========================
     messaging.onTokenRefresh.listen((newToken) async {
       print("🔄 NEW TOKEN: $newToken");
     });
 
+    // =========================
     // 📩 أثناء فتح التطبيق
+    // =========================
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('📩 إشعار أثناء فتح التطبيق');
       print('📌 Title: ${message.notification?.title}');
       print('📌 Body: ${message.notification?.body}');
     });
 
+    // =========================
     // 🚀 عند الضغط على الإشعار
+    // =========================
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('🚀 تم فتح التطبيق من إشعار');
     });
