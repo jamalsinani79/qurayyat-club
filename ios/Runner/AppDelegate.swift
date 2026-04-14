@@ -1,6 +1,5 @@
 import UIKit
 import Flutter
-import Firebase
 import FirebaseMessaging
 import UserNotifications
 
@@ -11,8 +10,6 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-
-    FirebaseApp.configure()
 
     UNUserNotificationCenter.current().delegate = self
 
