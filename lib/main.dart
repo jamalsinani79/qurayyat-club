@@ -60,11 +60,14 @@ Future<void> setupFirebaseMessaging() async {
     else if (Platform.isIOS) {
       print("🍎 IOS SETUP");
 
-      await messaging.requestPermission(
+      // طلب الإذن
+      NotificationSettings settings = await messaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
       );
+
+      print("🔔 Permission: ${settings.authorizationStatus}");
 
       await messaging.setForegroundNotificationPresentationOptions(
         alert: true,
@@ -72,21 +75,35 @@ Future<void> setupFirebaseMessaging() async {
         sound: true,
       );
 
-      String? token;
+      // 🔥 APNS
+      String? apnsToken = await messaging.getAPNSToken();
+      print("🍎 APNS TOKEN: $apnsToken");
 
-      // 🔥 retry مهم للـ iOS
-      for (int i = 0; i < 5; i++) {
-        token = await messaging.getToken();
-
-        if (token != null && token.isNotEmpty) break;
-
-        await Future.delayed(const Duration(seconds: 1));
+      if (apnsToken != null) {
+        Get.snackbar(
+          "APNS TOKEN",
+          apnsToken,
+          duration: const Duration(seconds: 10),
+        );
       }
 
-      print("🍎 IOS TOKEN: $token");
+      if (apnsToken == null) {
+        print("❌ APNS NOT READY");
+        return;
+      }
 
-      if (token != null) {
-        print("🍎 TOKEN READY: $token");
+      await Future.delayed(const Duration(seconds: 2));
+
+      // 🔥 FCM
+      String? fcmToken = await messaging.getToken();
+      print("🍎 FCM TOKEN: $fcmToken");
+
+      if (fcmToken != null) {
+        Get.snackbar(
+          "FCM TOKEN",
+          fcmToken,
+          duration: const Duration(seconds: 10),
+        );
       }
     }
 
@@ -126,10 +143,8 @@ class _QuriyatClubAppState extends State<QuriyatClubApp> {
   void initState() {
     super.initState();
 
-    // 🔥 تشغيل الإشعارات بعد تشغيل التطبيق
     Future.delayed(Duration.zero, () async {
       if (!kIsWeb) {
-        await Firebase.initializeApp();
         await setupFirebaseMessaging();
       }
     });
@@ -173,5 +188,3 @@ class _QuriyatClubAppState extends State<QuriyatClubApp> {
     );
   }
 }
-
-  
