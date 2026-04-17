@@ -16,28 +16,42 @@ class _AnimatedLogoScreenState extends State<AnimatedLogoScreen> {
   @override
   void initState() {
     super.initState();
+      print("🔥 INIT STATE WORKING");
     startAnimationAndNavigate();
   }
 
   Future<void> startAnimationAndNavigate() async {
-    try {
-      await Future.delayed(const Duration(seconds: 3));
+  try {
+    print("🚀 START SPLASH");
 
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+    await Future.delayed(const Duration(seconds: 3));
+    print("⏳ DELAY DONE");
 
-      if (token != null && token.isNotEmpty) {
-        await setupFirebaseMessaging();
-        Get.offAllNamed('/home');
-      } else {
-        Get.offAllNamed('/login');
-      }
+    final prefs = await SharedPreferences.getInstance();
+    print("📦 PREFS READY");
 
-    } catch (e) {
-      print("Navigation Error: $e");
+    final token = prefs.getString('auth_token');
+    print("🔑 TOKEN: $token");
+
+    if (token != null && token.isNotEmpty) {
+      print("➡️ USER LOGGED IN");
+
+      print("🔥 BEFORE FIREBASE SETUP");
+      await setupFirebaseMessaging();
+      print("🔥 AFTER FIREBASE SETUP");
+
+      print("➡️ GO TO HOME");
+      Get.offAllNamed('/home');
+    } else {
+      print("➡️ GO TO LOGIN");
       Get.offAllNamed('/login');
     }
+
+  } catch (e) {
+    print("❌ Navigation Error: $e");
+    Get.offAllNamed('/login');
   }
+}
 
   @override
   Widget build(BuildContext context) {

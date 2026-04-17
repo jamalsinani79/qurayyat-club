@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:551494455212:android:55df109a3d5386d6b6b409",
+        "mobilesdk_app_id": "1:551494455212:android:b85fd745a58444e4b6b409",
         "android_client_info": {
-          "package_name": "com.example.quriyat_club"
+          "package_name": "com.qurayyat.club"
         }
       },
       "oauth_client": [],
