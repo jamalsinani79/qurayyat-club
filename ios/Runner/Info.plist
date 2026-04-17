@@ -52,7 +52,5 @@
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 
-	<key>NSUserTrackingUsageDescription</key>
-	<string>نستخدم الإشعارات لتحسين تجربتك</string>
 </dict>
 </plist>
