@@ -16,7 +16,8 @@ class PlayerDetailsScreen extends StatefulWidget {
 class _PlayerDetailsScreenState extends State<PlayerDetailsScreen> with WidgetsBindingObserver {
   late Map<String, dynamic> player;
   bool isEditing = false;
-
+  bool linkSent = false;
+  
   final TextEditingController nameController = TextEditingController();
   final TextEditingController cardIdController = TextEditingController();
   final TextEditingController birthDateController = TextEditingController();
@@ -146,44 +147,48 @@ class _PlayerDetailsScreenState extends State<PlayerDetailsScreen> with WidgetsB
                   child: FractionallySizedBox(
                     widthFactor: 0.9,
                     child: ElevatedButton.icon(
-                      onPressed: () async {
-                        try {
-                          Get.snackbar(
-                            'جاري الإرسال',
-                            'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
-                          );
+                      onPressed: linkSent
+                          ? null // ❌ يتعطل بعد الإرسال
+                          : () async {
+                              try {
+                                Get.snackbar(
+                                  'جاري الإرسال',
+                                  'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
+                                );
 
-                          final success = await TeamService.sendPlayerPaymentLink(
-                            player['card_id'].toString(),
-                          );
+                                final success = await TeamService.sendPlayerPaymentLink(
+                                  player['card_id'].toString(),
+                                );
 
-                          if (success) {
-                            Get.snackbar(
-                              'تم بنجاح',
-                              'تم إرسال رابط الدفع إلى البريد الإلكتروني ✅',
-                              backgroundColor: Colors.green,
-                              colorText: Colors.white,
-                            );
-                          } else {
-                            Get.snackbar(
-                              'خطأ',
-                              'تعذر إرسال الرابط ❌',
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                          }
-                        } catch (e) {
-                          print('🟥 Error: $e');
-                          Get.snackbar('خطأ', 'حدث خطأ أثناء الإرسال');
-                        }
-                      },
-                      icon: const Icon(Icons.email),
-                      label: const Text('إرسال رابط الدفع'),
+                                if (success) {
+                                  setState(() {
+                                    linkSent = true; // ✅ تغيير الحالة
+                                  });
+
+                                  Get.snackbar(
+                                    'تم بنجاح',
+                                    'تم إرسال رابط الدفع إلى البريد الإلكتروني ✅',
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white,
+                                  );
+                                } else {
+                                  Get.snackbar(
+                                    'خطأ',
+                                    'تعذر إرسال الرابط ❌',
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                  );
+                                }
+                              } catch (e) {
+                                Get.snackbar('خطأ', 'حدث خطأ أثناء الإرسال');
+                              }
+                            },
+                      icon: Icon(linkSent ? Icons.check : Icons.email),
+                      label: Text(linkSent ? 'تم إرسال الرابط' : 'إرسال رابط الدفع'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: linkSent ? Colors.grey : Colors.orange,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(fontSize: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),

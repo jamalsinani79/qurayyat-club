@@ -22,7 +22,8 @@ class _LoanRequestDetailsScreenState extends State<LoanRequestDetailsScreen>
   bool decisionMade = false;
   bool? isApproved;
   bool secondConsent = false;
-
+  bool linkSent = false;
+  
   @override
   void initState() {
     super.initState();
@@ -192,59 +193,73 @@ class _LoanRequestDetailsScreenState extends State<LoanRequestDetailsScreen>
                 ),
 
               if (isClubApproved && isSent && !isDoneOrExpired)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final requestId = req['id'];
-                  if (requestId == null) {
-                    Get.snackbar('خطأ', 'رقم الطلب غير متوفر');
-                    return;
-                  }
+                  ElevatedButton.icon(
+                    onPressed: linkSent
+                        ? null
+                        : () async {
+                            final requestId = req['id'];
+                            if (requestId == null) {
+                              Get.snackbar('خطأ', 'رقم الطلب غير متوفر');
+                              return;
+                            }
 
-                  Get.snackbar(
-                    'جاري الإرسال',
-                    'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
-                    backgroundColor: Colors.blue,
-                    colorText: Colors.white,
-                  );
+                            Get.snackbar(
+                              'جاري الإرسال',
+                              'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
+                              backgroundColor: Colors.blue,
+                              colorText: Colors.white,
+                            );
 
-                  final success = await TeamService.sendLoanPaymentLink(requestId.toString());
+                            final success = await TeamService.sendLoanPaymentLink(
+                              requestId.toString(),
+                            );
 
-                  if (success) {
-                    Get.snackbar(
-                      'تم بنجاح',
-                      'تم إرسال رابط الدفع إلى البريد الإلكتروني للفريق ✅',
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                    );
-                  } else {
-                    Get.snackbar(
-                      'خطأ',
-                      'تعذر إرسال رابط الدفع ❌',
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // تغيير اللون اختياري
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                icon: const Icon(Icons.email, color: Colors.white),
-                label: const Text(
-                  'إرسال رابط الدفع',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
+                            if (success) {
+                              setState(() {
+                                linkSent = true; // ✅ تغيير حالة الزر
+                              });
 
-            if (isDoneOrExpired || (isClubApproved && !isSent))
-              const Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  'هذا الطلب لا يتطلب أي إجراء حالياً، وهو معروض للعلم فقط.',
-                  style: TextStyle(fontSize: 13),
-                ),
-              ),
+                              Get.snackbar(
+                                'تم بنجاح',
+                                'تم إرسال رابط الدفع إلى البريد الإلكتروني للفريق ✅',
+                                backgroundColor: Colors.green,
+                                colorText: Colors.white,
+                              );
+                            } else {
+                              Get.snackbar(
+                                'خطأ',
+                                'تعذر إرسال رابط الدفع ❌',
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: linkSent ? Colors.grey : Colors.orange,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    icon: Icon(
+                      linkSent ? Icons.check : Icons.email,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      linkSent ? 'تم إرسال الرابط' : 'إرسال رابط الدفع',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                if (isDoneOrExpired || (isClubApproved && !isSent))
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text(
+                      'هذا الطلب لا يتطلب أي إجراء حالياً، وهو معروض للعلم فقط.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
             ],
           ),
         ),

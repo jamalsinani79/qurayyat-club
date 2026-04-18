@@ -216,20 +216,43 @@ class _SubmitTransferRequestScreenState extends State<SubmitTransferRequestScree
                   buildUploadBox('استمارة موافقة اللاعب', playerDoc, () => pickImage((f) => setState(() => playerDoc = f))),
                 const SizedBox(height: 24),
               ],
-              if (widget.isReviewMode && status == 'وافق عليه النادي' && !hasTransaction)
+              if (widget.isReviewMode && status == 'وافق عليه النادي')
                 ElevatedButton(
-                  onPressed: sendPaymentLink,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('💳 الدفع الآن', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  onPressed: hasTransaction
+                      ? null // ❌ تعطيل بعد الإرسال
+                      : () async {
+                          await sendPaymentLink();
+
+                          setState(() {
+                            hasTransaction = true; // ✅ تغيير الحالة
+                          });
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: hasTransaction ? Colors.grey : Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    hasTransaction ? 'تم إرسال الرابط ✅' : 'إرسال رابط الدفع',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 )
               else if (!widget.isReviewMode)
                 ElevatedButton(
                   onPressed: isSubmitting ? null : submit,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                   child: isSubmitting
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('إرسال', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
+                      : const Text(
+                          'إرسال',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                ), 
             ],
           ),
         ),
