@@ -218,7 +218,7 @@ class _SubmitTransferRequestScreenState extends State<SubmitTransferRequestScree
               ],
               if (widget.isReviewMode && status == 'وافق عليه النادي' && !hasTransaction)
                 ElevatedButton(
-                  onPressed: launchPayment,
+                  onPressed: sendPaymentLink,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: const Text('💳 الدفع الآن', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 )
