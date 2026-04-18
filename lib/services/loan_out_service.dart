@@ -199,15 +199,33 @@ static Future<Map<String, dynamic>?> getLoanOutPlayer(int id) async {
 }
 
 static Future<bool> sendPaymentLinkToEmail(int id) async {
+  final token = await _getToken();
+
+  if (token == null) {
+    throw Exception('التوكن غير موجود');
+  }
+
   final response = await http.post(
     Uri.parse('$baseUrl/send-out-loan-payment-link'),
-    body: {
-      'id': id.toString(),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
     },
+    body: jsonEncode({
+      'id': id,
+    }),
   );
 
-  final data = jsonDecode(response.body);
-  return data['status'] == true;
+  print('📤 إرسال رابط الدفع: ${response.statusCode}');
+  print('📥 Response: ${response.body}');
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['status'] == true;
+  }
+
+  return false;
 }
 
 }
