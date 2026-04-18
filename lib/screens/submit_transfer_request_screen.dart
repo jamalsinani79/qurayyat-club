@@ -116,23 +116,20 @@ class _SubmitTransferRequestScreenState extends State<SubmitTransferRequestScree
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  Future<void> launchPayment() async {
-    final id = widget.request?['id'];
-    if (id == null) return;
+  Future<void> sendPaymentLink() async {
+  final id = widget.request?['id'];
+  if (id == null) return;
 
-    try {
-      final response = await TeamService.generateTransferPaymentUrl(id);
-      final paymentUrl = response['url'];
+  showTopMsg('جاري إرسال رابط الدفع...');
 
-      if (await canLaunchUrl(Uri.parse(paymentUrl))) {
-        await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.externalApplication);
-      } else {
-        showTopMsg('تعذر فتح صفحة الدفع', isError: true);
-      }
-    } catch (e) {
-      showTopMsg('حدث خطأ أثناء تحميل رابط الدفع', isError: true);
-    }
+  final success = await TeamService.sendTransferPaymentLink(id.toString());
+
+  if (success) {
+    showTopMsg('تم إرسال الرابط إلى البريد الإلكتروني ✅');
+  } else {
+    showTopMsg('تعذر إرسال الرابط ❌', isError: true);
   }
+}
 
   Future<void> refreshTransferRequest() async {
     final id = widget.request?['id'];

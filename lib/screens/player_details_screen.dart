@@ -148,33 +148,45 @@ class _PlayerDetailsScreenState extends State<PlayerDetailsScreen> with WidgetsB
                     child: ElevatedButton.icon(
                       onPressed: () async {
                         try {
-                          final result = await TeamService.generatePaymentUrl(player['card_id'].toString());
-                          if (result['status']) {
-                            final rawUrl = result['info']['url'];
-                            print('🔗 رابط الدفع: $rawUrl');
+                          Get.snackbar(
+                            'جاري الإرسال',
+                            'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
+                          );
 
-                            if (await canLaunchUrlString(rawUrl)) {
-                              await launchUrlString(rawUrl, mode: LaunchMode.externalApplication);
-                            } else {
-                              print('❌ تعذر فتح الرابط');
-                              Get.snackbar('خطأ', 'تعذر فتح رابط الدفع');
-                            }
+                          final success = await TeamService.sendPlayerPaymentLink(
+                            player['card_id'].toString(),
+                          );
+
+                          if (success) {
+                            Get.snackbar(
+                              'تم بنجاح',
+                              'تم إرسال رابط الدفع إلى البريد الإلكتروني ✅',
+                              backgroundColor: Colors.green,
+                              colorText: Colors.white,
+                            );
                           } else {
-                            Get.snackbar('خطأ', result['message'] ?? 'فشل في إنشاء رابط الدفع');
+                            Get.snackbar(
+                              'خطأ',
+                              'تعذر إرسال الرابط ❌',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
                           }
                         } catch (e) {
-                          print('🟥 Error in payment button: $e');
-                          Get.snackbar('خطأ', 'حدث خطأ أثناء محاولة فتح بوابة الدفع');
+                          print('🟥 Error: $e');
+                          Get.snackbar('خطأ', 'حدث خطأ أثناء الإرسال');
                         }
                       },
-                      icon: const Icon(Icons.payment),
-                      label: const Text('الدفع الآن'),
+                      icon: const Icon(Icons.email),
+                      label: const Text('إرسال رابط الدفع'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                   ),

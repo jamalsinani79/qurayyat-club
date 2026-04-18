@@ -881,8 +881,84 @@ static Future<Map<String, dynamic>> fetchRenewalStatus() async {
   }
 }
 
+ static Future<bool> sendLoanPaymentLink(String id) async {
+  final token = await getToken();
+  final uri = Uri.parse('$baseUrl/player/loan/send-payment-link');
 
+  try {
+    final response = await http.post(
+      uri,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'id': id,
+      },
+    );
 
+    final data = json.decode(response.body);
+
+    print('📤 sendLoanPaymentLink response: $data');
+
+    if (response.statusCode == 200 && data['status'] == true) {
+      return true;
+    } else {
+      print('🟥 فشل الإرسال: ${data['message']}');
+      return false;
+    }
+  } catch (e) {
+    print('🟥 Error in sendLoanPaymentLink: $e');
+    return false;
+  }
+}
+
+static Future<bool> sendTransferPaymentLink(String id) async {
+  final token = await getToken();
+  final uri = Uri.parse('$baseUrl/player/transfer/send-payment-link');
+
+  try {
+    final response = await http.post(
+      uri,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: {
+        'id': id,
+      },
+    );
+
+    final data = json.decode(response.body);
+
+    if (response.statusCode == 200 && data['status'] == true) {
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    print('🟥 Error: $e');
+    return false;
+  }
+}
   
+  static Future<bool> sendPlayerPaymentLink(String cardId) async {
+  final token = await getToken();
+
+  final response = await http.post(
+    Uri.parse('$baseUrl/player/send-payment-link'),
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: {
+      'card_id': cardId,
+    },
+  );
+
+  final data = json.decode(response.body);
+  return data['status'] == true;
+}
+
 }
 

@@ -192,46 +192,59 @@ class _LoanRequestDetailsScreenState extends State<LoanRequestDetailsScreen>
                 ),
 
               if (isClubApproved && isSent && !isDoneOrExpired)
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final requestId = req['id'];
-                    if (requestId == null) {
-                      Get.snackbar('خطأ', 'رقم الطلب غير متوفر');
-                      return;
-                    }
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final requestId = req['id'];
+                  if (requestId == null) {
+                    Get.snackbar('خطأ', 'رقم الطلب غير متوفر');
+                    return;
+                  }
 
-                    Get.snackbar('جاري التحميل', 'جاري إنشاء رابط الدفع...',
-                        backgroundColor: Colors.blue, colorText: Colors.white);
-
-                    final url = await TeamService.generateLoanPaymentUrl(requestId.toString());
-                    if (url != null && await launcher.canLaunchUrl(Uri.parse(url))) {
-                      await launcher.launchUrl(Uri.parse(url),
-                          mode: launcher.LaunchMode.externalApplication);
-                    } else {
-                      Get.snackbar('خطأ', 'تعذر فتح رابط الدفع',
-                          backgroundColor: Colors.red, colorText: Colors.white);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
+                  Get.snackbar(
+                    'جاري الإرسال',
+                    'جاري إرسال رابط الدفع إلى البريد الإلكتروني...',
                     backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                  icon: const Icon(Icons.payment, color: Colors.white),
-                  label: const Text(
-                    'الدفع',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
+                    colorText: Colors.white,
+                  );
 
-              if (isDoneOrExpired || (isClubApproved && !isSent))
-                const Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text(
-                    'هذا الطلب لا يتطلب أي إجراء حالياً، وهو معروض للعلم فقط.',
-                    style: TextStyle(fontSize: 13),
-                  ),
+                  final success = await TeamService.sendLoanPaymentLink(requestId.toString());
+
+                  if (success) {
+                    Get.snackbar(
+                      'تم بنجاح',
+                      'تم إرسال رابط الدفع إلى البريد الإلكتروني للفريق ✅',
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                  } else {
+                    Get.snackbar(
+                      'خطأ',
+                      'تعذر إرسال رابط الدفع ❌',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // تغيير اللون اختياري
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  minimumSize: const Size.fromHeight(48),
                 ),
+                icon: const Icon(Icons.email, color: Colors.white),
+                label: const Text(
+                  'إرسال رابط الدفع',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
+
+            if (isDoneOrExpired || (isClubApproved && !isSent))
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(
+                  'هذا الطلب لا يتطلب أي إجراء حالياً، وهو معروض للعلم فقط.',
+                  style: TextStyle(fontSize: 13),
+                ),
+              ),
             ],
           ),
         ),
