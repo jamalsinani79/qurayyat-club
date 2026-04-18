@@ -3,6 +3,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/loan_out_service.dart';
+import 'dart:io';
 
 class LoanOutDetailScreen extends StatefulWidget {
   final Map<String, dynamic> player;
@@ -57,7 +58,7 @@ class _LoanOutDetailScreenState extends State<LoanOutDetailScreen> with WidgetsB
       case 'club_approve':
         return 'تمت الموافقة من النادي';
       case 'done':
-        return 'مكتمل';
+        return 'جارية';
       case 'expired':
         return 'منتهي';
       default:
@@ -106,6 +107,7 @@ class _LoanOutDetailScreenState extends State<LoanOutDetailScreen> with WidgetsB
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // 🔹 زر إرسال الطلب
               if ((player['status'] ?? '') == 'draft')
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -133,34 +135,64 @@ class _LoanOutDetailScreenState extends State<LoanOutDetailScreen> with WidgetsB
               else
                 const SizedBox.shrink(),
 
+              // 🔹 زر الدفع (معدل)
               if ((player['status'] ?? '') == 'club_approve')
-  ElevatedButton.icon(
-    onPressed: () async {
-      final url = await LoanOutService.generatePaymentUrl(player['id']);
-      if (url != null) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).then((_) async {
-          // ✅ بعد الرجوع من صفحة الدفع مباشرة، جلب جديد للحالة
-          await _refreshPlayer();
-        });
-      } else {
-        Flushbar(
-          message: '⚠️ تعذر إنشاء رابط الدفع',
-          duration: const Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          flushbarPosition: FlushbarPosition.TOP,
-          margin: const EdgeInsets.all(8),
-          borderRadius: BorderRadius.circular(8),
-        ).show(context);
-      }
-    },
-    icon: const Icon(Icons.payment),
-    label: const Text('دفع رسوم الإعارة'),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-    ),
-  ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    if (Platform.isIOS) {
+                      // ✅ iOS: إرسال رابط الدفع للإيميل
+                      final success = await LoanOutService.sendPaymentLinkToEmail(player['id']);
 
+                      if (success) {
+                        Flushbar(
+                          message: '📩 تم إرسال رابط الدفع إلى بريدك الإلكتروني',
+                          duration: const Duration(seconds: 3),
+                          backgroundColor: Colors.green,
+                          flushbarPosition: FlushbarPosition.TOP,
+                          margin: const EdgeInsets.all(8),
+                          borderRadius: BorderRadius.circular(8),
+                        ).show(context);
+                      } else {
+                        Flushbar(
+                          message: '⚠️ حدث خطأ أثناء إرسال الرابط',
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: Colors.red,
+                        ).show(context);
+                      }
+                    } else {
+                      // ✅ Android: الدفع الطبيعي
+                      final url = await LoanOutService.generatePaymentUrl(player['id']);
+
+                      if (url != null) {
+                        await launchUrl(
+                          Uri.parse(url),
+                          mode: LaunchMode.externalApplication,
+                        ).then((_) async {
+                          await _refreshPlayer();
+                        });
+                      } else {
+                        Flushbar(
+                          message: '⚠️ تعذر إنشاء رابط الدفع',
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: Colors.red,
+                          flushbarPosition: FlushbarPosition.TOP,
+                          margin: const EdgeInsets.all(8),
+                          borderRadius: BorderRadius.circular(8),
+                        ).show(context);
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.payment),
+                  label: Text(
+                    Platform.isIOS ? 'إرسال رابط الدفع' : 'دفع رسوم الإعارة',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+
+              // 🔹 زر الحذف
               if ((player['status'] ?? '') == 'draft')
                 IconButton(
                   onPressed: () {

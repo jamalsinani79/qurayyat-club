@@ -198,6 +198,16 @@ static Future<Map<String, dynamic>?> getLoanOutPlayer(int id) async {
   return null;
 }
 
+static Future<bool> sendPaymentLinkToEmail(int id) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/send-out-loan-payment-link'),
+    body: {
+      'id': id.toString(),
+    },
+  );
 
+  final data = jsonDecode(response.body);
+  return data['status'] == true;
+}
 
 }

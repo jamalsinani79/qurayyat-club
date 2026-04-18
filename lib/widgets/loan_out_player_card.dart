@@ -149,7 +149,7 @@ class LoanOutPlayerCard extends StatelessWidget {
       case 'club_approve':
         return 'وافق النادي';
       case 'done':
-        return 'مكتمل';
+        return 'جارية';
       case 'expired':
         return 'منتهي';
       default:
